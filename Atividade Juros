@@ -1,0 +1,365 @@
+package com.example.juros
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.juros.ui.theme.JurosTheme
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import kotlin.math.pow
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            JurosTheme(darkTheme = true) {
+                JurosScreen()
+            }
+        }
+    }
+}
+
+enum class TipoJuro { Simples, Composto }
+
+enum class TipoAmigo(val label: String, val taxa: Double) {
+    MelhorAmigo("Prof Filipe (Sem juros para os brothers)", 0.0),
+    Amigo("Amigo (5%)", 5.0),
+    Colega("Colega (10%)", 10.0),
+    Desconhecido("Desconhecido (25%)", 25.0)
+}
+
+
+@Composable
+fun JurosScreen() {
+
+    // Estados principais
+    var valorEmprestado by remember { mutableFloatStateOf(1000f) }
+   // var taxaJuro by remember { mutableStateOf("") }
+    var periodo by remember { mutableStateOf("") }
+    var tipoJuro by remember { mutableStateOf(TipoJuro.Simples) }
+    var resultadoJuros by remember { mutableStateOf<Double?>(null) }
+    var resultadoTotal by remember { mutableStateOf<Double?>(null) }
+    var tipoAmigo by remember { mutableStateOf(TipoAmigo.Amigo) }
+    var arredondar by remember { mutableStateOf(false) }
+
+    // Cor de destaque muda conforme o tipo de juro selecionado
+    val corDestaque by animateColorAsState(
+        targetValue = if (tipoJuro == TipoJuro.Simples) Color(0xFF00BCD4) else Color(0xFFFF6F00),
+        animationSpec = tween(500),
+        label = "corDestaque"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0D0D0D))
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Título
+        Text(
+            text = "Calculadora de Juros",
+            style = MaterialTheme.typography.headlineMedium,
+            color = corDestaque
+        )
+        Text(
+            text = "Descubra quanto você vai pagar",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF888888)
+        )
+
+        // Card do valor emprestado com Slider
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1C)),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Valor Emprestado",
+                    color = Color(0xFF888888),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Text(
+                    text = "R$ ${"%,.2f".format(valorEmprestado)}",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Slider(
+                    value = valorEmprestado,
+                    onValueChange = { valorEmprestado = it },
+                    valueRange = 100f..50000f,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = corDestaque,
+                        activeTrackColor = corDestaque,
+                        inactiveTrackColor = Color(0xFF333333)
+                    )
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("R$ 100", color = Color(0xFF555555), style = MaterialTheme.typography.bodySmall)
+                    Text("R$ 50.000", color = Color(0xFF555555), style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1C)),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                OutlinedTextField(
+                    value = periodo,
+                    onValueChange = { periodo = it },
+                    label = { Text("Período (meses)") },
+                    placeholder = { Text("ex: 12") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = corDestaque,
+                        focusedLabelColor = corDestaque,
+                        unfocusedBorderColor = Color(0xFF444444),
+                        unfocusedLabelColor = Color(0xFF888888),
+                        cursorColor = corDestaque,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
+                )
+            }
+        }
+
+        // Card dos inputs de taxa e período
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1C)),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Quanto a pessoa é sua amiga?",
+                    color = Color(0xFF888888),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TipoAmigo.entries.forEach { opcao ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = tipoAmigo == opcao,
+                                onClick = {
+                                    tipoAmigo = opcao
+                                    resultadoJuros = null
+                                    resultadoTotal = null
+                                },
+                                role = Role.RadioButton
+                            )
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = tipoAmigo == opcao,
+                            onClick = null,
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = corDestaque,
+                                unselectedColor = Color(0xFF555555)
+                            )
+                        )
+                        Text(
+                            text = opcao.label,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Card do RadioGroup - tipo de juro
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1C)),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Tipo de Juros",
+                    color = Color(0xFF888888),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TipoJuro.entries.forEach { opcao ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = tipoJuro == opcao,
+                                onClick = {
+                                    tipoJuro = opcao
+                                    resultadoJuros = null
+                                    resultadoTotal = null
+                                },
+                                role = Role.RadioButton
+                            )
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = tipoJuro == opcao,
+                            onClick = null,
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = corDestaque,
+                                unselectedColor = Color(0xFF555555)
+                            )
+                        )
+                        Column(modifier = Modifier.padding(start = 8.dp)) {
+                            Text(
+                                text = opcao.name,
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = if (opcao == TipoJuro.Simples) "Cresce sempre o mesmo valor" else "Cresce sobre o que já cresceu",
+                                color = Color(0xFF555555),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text("Arredondar resultado?", color = Color.White, style = MaterialTheme.typography.bodyLarge)
+                Text("Arredonda para o inteiro mais próximo", color = Color(0xFF888888), style = MaterialTheme.typography.bodySmall)
+            }
+            Switch(
+                checked = arredondar,
+                onCheckedChange = { arredondar = it }
+            )
+        }
+
+        // Botão calcular
+        Button(
+            onClick = {
+                // Agora pega a taxa do enum ao invés do TextField
+                val taxa = tipoAmigo.taxa / 100
+                val meses = periodo.toIntOrNull()
+
+                if (meses != null) {
+                    val principal = valorEmprestado.toDouble()
+                    if (tipoJuro == TipoJuro.Simples) {
+                        val juros = principal * taxa * meses
+                        resultadoJuros = juros
+                        resultadoTotal = principal + juros
+                    } else {
+                        val montante = principal * Math.pow(1 + taxa, meses.toDouble())
+                        resultadoJuros = montante - principal
+                        resultadoTotal = montante
+                    }
+                }
+
+                if (arredondar) {
+                    resultadoJuros = Math.round(resultadoJuros!!).toDouble()
+                    resultadoTotal = Math.round(resultadoTotal!!).toDouble()
+                }
+            },
+            modifier = Modifier.fillMaxWidth().height(52.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = corDestaque)
+        ) {
+            Text("Calcular", style = MaterialTheme.typography.titleMedium, color = Color.Black)
+        }
+
+        // Card do resultado - só aparece depois de calcular
+        if (resultadoJuros != null && resultadoTotal != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1C)),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, corDestaque)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Resultado",
+                        color = corDestaque,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Valor emprestado", color = Color(0xFF888888))
+                        Text("R$ ${"%,.2f".format(valorEmprestado)}", color = Color.White)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Juros gerados", color = Color(0xFF888888))
+                        Text("R$ ${"%,.2f".format(resultadoJuros)}", color = corDestaque)
+                    }
+                    HorizontalDivider(color = Color(0xFF333333))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Total a pagar", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "R$ ${"%,.2f".format(resultadoTotal)}",
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
