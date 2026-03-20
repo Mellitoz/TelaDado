@@ -56,9 +56,8 @@ enum class TipoAmigo(val label: String, val taxa: Double) {
 @Composable
 fun JurosScreen() {
 
-    // Estados principais
+    // Variaveis principais
     var valorEmprestado by remember { mutableFloatStateOf(1000f) }
-   // var taxaJuro by remember { mutableStateOf("") }
     var periodo by remember { mutableStateOf("") }
     var tipoJuro by remember { mutableStateOf(TipoJuro.Simples) }
     var resultadoJuros by remember { mutableStateOf<Double?>(null) }
@@ -66,7 +65,7 @@ fun JurosScreen() {
     var tipoAmigo by remember { mutableStateOf(TipoAmigo.Amigo) }
     var arredondar by remember { mutableStateOf(false) }
 
-    // Cor de destaque muda conforme o tipo de juro selecionado
+    // Cor muda conforme o juro selecionado
     val corDestaque by animateColorAsState(
         targetValue = if (tipoJuro == TipoJuro.Simples) Color(0xFF00BCD4) else Color(0xFFFF6F00),
         animationSpec = tween(500),
@@ -84,7 +83,6 @@ fun JurosScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Título
         Text(
             text = "Calculadora de Juros",
             style = MaterialTheme.typography.headlineMedium,
@@ -96,7 +94,7 @@ fun JurosScreen() {
             color = Color(0xFF888888)
         )
 
-        // Card do valor emprestado com Slider
+        // Card com Slider
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1C)),
@@ -162,7 +160,7 @@ fun JurosScreen() {
             }
         }
 
-        // Card dos inputs de taxa e período
+        // Card de taxa
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1C)),
@@ -210,7 +208,7 @@ fun JurosScreen() {
             }
         }
 
-        // Card do RadioGroup - tipo de juro
+        // Card do RadioGroup 
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1C)),
@@ -313,7 +311,7 @@ fun JurosScreen() {
             Text("Calcular", style = MaterialTheme.typography.titleMedium, color = Color.Black)
         }
 
-        // Card do resultado - só aparece depois de calcular
+        // Card do resultado 
         if (resultadoJuros != null && resultadoTotal != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
