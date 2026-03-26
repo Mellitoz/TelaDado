@@ -1,0 +1,361 @@
+package com.example.rpg
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.painterResource
+import com.example.rpg.ui.theme.RPGTheme
+
+
+class MainActivity : ComponentActivity() {
+
+  
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            RPGTheme(darkTheme = true){
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    TelaRPG()
+                }
+           }
+        }
+    }
+}
+
+
+enum class Cena {
+    INICIO,
+    CAMINHO_AGUA,
+    CAMINHO_FUMACA,
+    FINAL_BOM,
+    FINAL_RUIM,
+    FINAL_BOM_2,
+    FINAL_RUIM_2
+}
+
+@Composable
+fun TelaRPG() {
+    var cenaAtual by remember { mutableStateOf(Cena.INICIO) }
+    when (cenaAtual) {
+        Cena.INICIO -> CenaInicio(onEscolha = { cenaAtual = it })
+        Cena.CAMINHO_AGUA -> CenaCaminhoAgua(onEscolha = { cenaAtual = it })
+        Cena.CAMINHO_FUMACA -> CenaCaminhoFumaca(onEscolha = { cenaAtual = it })
+        Cena.FINAL_BOM -> CenaFinalBom(onReiniciar = { cenaAtual = Cena.INICIO })
+        Cena.FINAL_RUIM -> CenaFinalRuim(onReiniciar = { cenaAtual = Cena.INICIO })
+        Cena.FINAL_BOM_2 -> CenaFinalBom2(onReiniciar = {cenaAtual = Cena.INICIO})
+        Cena.FINAL_RUIM_2 -> CenaFinalRuim2(onReiniciar = {cenaAtual = Cena.INICIO})
+    }
+}
+
+@Composable
+fun CenaInicio(onEscolha: (Cena) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "🌲 A Floresta Sombria",
+            fontSize = 26.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Você acorda no meio de uma floresta escura Não sabe como chegou aqui. " +
+                    "O ar está frio e dois caminhos surgem à sua frente.",
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        Button(
+            onClick = { onEscolha(Cena.CAMINHO_AGUA) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("💧 Seguir o som da água")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = { onEscolha(Cena.CAMINHO_FUMACA) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🔥 Seguir a fumaça ao longe")
+        }
+    }
+}
+
+
+@Composable
+fun CenaCaminhoAgua(onEscolha: (Cena) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "💧 O Som da Água",
+            fontSize = 26.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Você segue o barulho da água e encontra um riacho cristalino. " +
+                    "Do outro lado, as luzes de um vilarejo aparecem entre as árvores. " +
+                    "Um pescador te avista e acena. O que você faz?",
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = { onEscolha(Cena.FINAL_BOM) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🤝 Aceitar a ajuda do pescador")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        Button(
+            onClick = { onEscolha(Cena.FINAL_BOM_2) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🏃 Atravessar o riacho sozinho")
+        }
+    }
+}
+
+@Composable
+fun CenaCaminhoFumaca(onEscolha: (Cena) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "🔥 A Fumaça ao Longe",
+            fontSize = 26.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Você caminha em direção à fumaça e encontra um acampamento abandonado. " +
+                    "De repente, vozes ao redor. São bandidos. " +
+                    "Você tenta correr, mas se perde ainda mais fundo na floresta.",
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = { onEscolha(Cena.FINAL_RUIM) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("😨 Tentar escapar pela floresta")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = { onEscolha(Cena.FINAL_RUIM_2) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🙏 Se render e pedir misericórdia")
+        }
+    }
+}
+
+@Composable
+fun CenaFinalBom(onReiniciar: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "🏡 Final Feliz",
+            fontSize = 26.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Os moradores do vilarejo te recebem com comida e abrigo. " +
+                    "No dia seguinte, um guia te leva de volta para casa. " +
+                    "Você nunca mais esqueceu aquela floresta, nem as pessoas que te salvaram.",
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = { onReiniciar() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🔄 Jogar novamente")
+        }
+    }
+}
+
+@Composable
+fun CenaFinalRuim(onReiniciar: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "💀 Final Trágico",
+            fontSize = 26.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Você corre sem direção pela floresta escura. " +
+                    "Os galhos arranham seu rosto, as vozes ecoam ao redor. " +
+                    "Ninguém nunca soube o que aconteceu com o aventureiro Filipe daquela noite.",
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = { onReiniciar() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🔄 Tentar novamente")
+        }
+    }
+}
+
+@Composable
+fun CenaFinalBom2(onReiniciar: () -> Unit){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "🏡 Final Feliz",
+            fontSize = 26.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Você atravessa o Riacho e encontra uma trilha. " +
+                    "Então começou a andar na trilha e encontrou um cogumelo. " +
+                    "Você comeu o cogumelo e virou um gnomo da felicidade.",
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = { onReiniciar() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🔄 Tentar novamente")
+        }
+    }
+}
+
+@Composable
+fun CenaFinalRuim2(onReiniciar: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "🔪 Novo Recrutamento",
+            fontSize = 26.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Você ajoelha e se rende pedindo misericórdia. " +
+                    "Os bandidos te olham, dão risada... e te estendem a mão. " +
+                    "Parabéns, você agora faz parte da gangue da floresta. Mas fica esperto",
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = { onReiniciar() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🔄 Tentar novamente")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Image(
+            painter = painterResource(id = R.drawable.atento),
+            contentDescription = "Judas não era um estranho",
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
